@@ -46,7 +46,6 @@
                 <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-200">
                     <a href="#home" class="hover:text-white transition-colors">Home</a>
                     <a href="#cakes" class="hover:text-white transition-colors">Cakes</a>
-                    <a href="#menu" class="hover:text-white transition-colors">Menu</a>
                     <a href="#order-section" class="hover:text-white transition-colors">Order</a>
                     <a href="#contact" class="hover:text-white transition-colors">Contact</a>
                 </nav>
@@ -85,7 +84,6 @@
             <div id="mobile-nav-panel" class="hidden md:hidden mt-3 rounded-2xl bg-zinc-950/95 border border-white/15 backdrop-blur-xl p-3.5 space-y-1.5 shadow-2xl">
                 <a href="#home" onclick="toggleMobileMenu(false)" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-200 hover:bg-white/10 hover:text-white">Home</a>
                 <a href="#cakes" onclick="toggleMobileMenu(false)" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-200 hover:bg-white/10 hover:text-white">Cakes (6 Models)</a>
-                <a href="#menu" onclick="toggleMobileMenu(false)" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-200 hover:bg-white/10 hover:text-white">Menu &amp; Rate Card</a>
                 <a href="#order-section" onclick="toggleMobileMenu(false)" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-200 hover:bg-white/10 hover:text-white">Order Summary</a>
                 <a href="#contact" onclick="toggleMobileMenu(false)" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-200 hover:bg-white/10 hover:text-white">Contact &amp; WhatsApp</a>
             </div>
@@ -111,7 +109,7 @@
     </section>
 
     <!-- =========================================================
-         2. BELOW-VIDEO INTRO BAR (SUB-HEADING & DUAL CTA BUTTONS)
+         2. BELOW-VIDEO INTRO BAR
     ========================================================== -->
     <section class="border-b border-zinc-800/80 bg-zinc-950 py-10 sm:py-14 px-4 sm:px-6 lg:px-8">
         <div class="max-w-4xl mx-auto text-center">
@@ -130,13 +128,11 @@
                     <span>&darr;</span>
                 </a>
                 <a
-                    href="#menu"
+                    href="#order-section"
                     class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-semibold text-sm tracking-wide transition-all"
                 >
-                    <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                    <span>Menu &amp; Rate Card</span>
+                    <span>Go to Order Bill</span>
+                    <span>&rarr;</span>
                 </a>
             </div>
         </div>
@@ -145,7 +141,7 @@
     <!-- =========================================================
          3. 6 FEATURED CAKE PRODUCT CARDS
     ========================================================== -->
-    <section id="cakes" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <section id="cakes" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-zinc-800/80">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 sm:mb-14">
             <div>
                 <span class="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Signature Collection</span>
@@ -165,60 +161,7 @@
     </section>
 
     <!-- =========================================================
-         4. RESPONSIVE 10-CAKE MENU & RATE CARD + BAKERY EXTRAS
-    ========================================================== -->
-    <section id="menu" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-zinc-900/40 border-y border-zinc-800/80">
-        <div class="max-w-6xl mx-auto">
-            <div class="text-center max-w-2xl mx-auto mb-12">
-                <span class="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Complete Tariff</span>
-                <h2 class="font-display text-3xl sm:text-4xl font-bold text-white mt-2">
-                    10-Cake Menu &amp; Rate Card
-                </h2>
-                <p class="text-sm sm:text-base text-zinc-400 mt-3">
-                    Freshly baked daily to order. Tap any weight price below to add it straight into your order summary.
-                </p>
-            </div>
-
-            <!-- Desktop & Tablet Comparison Table -->
-            <div class="hidden sm:block glass-card rounded-3xl overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-zinc-800 bg-zinc-900/80 text-xs uppercase tracking-wider text-zinc-400">
-                            <th class="py-4 px-6 font-semibold">#</th>
-                            <th class="py-4 px-6 font-semibold">Cake Variety</th>
-                            <th class="py-4 px-6 font-semibold text-center">0.5 Kg</th>
-                            <th class="py-4 px-6 font-semibold text-center">1.0 Kg</th>
-                            <th class="py-4 px-6 font-semibold text-center">2.0 Kg</th>
-                        </tr>
-                    </thead>
-                    <tbody id="desktop-menu-tbody" class="divide-y divide-zinc-800/70 text-sm">
-                        <!-- Rendered dynamically via script.js -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Mobile Stacked Touch Cards (< 640px) -->
-            <div id="mobile-menu-cards" class="sm:hidden space-y-3.5">
-                <!-- Rendered dynamically via script.js -->
-            </div>
-
-            <!-- Quick-Add Bakery Extras -->
-            <div class="mt-10 glass-card rounded-3xl p-6 sm:p-8">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
-                    <div>
-                        <h3 class="font-display text-lg sm:text-xl font-bold text-white">Customizations &amp; Bakery Extras</h3>
-                        <p class="text-xs sm:text-sm text-zinc-400">Tap any add-on to include it in your cake order.</p>
-                    </div>
-                </div>
-                <div id="addons-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                    <!-- Rendered dynamically via script.js -->
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- =========================================================
-         5. ON-PAGE SPLIT-COLUMN ORDER & WHATSAPP BILL SECTION
+         4. ON-PAGE SPLIT-COLUMN ORDER & WHATSAPP BILL SECTION
     ========================================================== -->
     <section id="order-section" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-zinc-800/80 bg-zinc-950">
         <div class="max-w-6xl mx-auto">
@@ -246,10 +189,10 @@
 
                     <div class="mt-7">
                         <a
-                            href="#menu"
+                            href="#cakes"
                             class="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-200 hover:text-white border-b border-zinc-500 hover:border-white pb-1 transition-colors"
                         >
-                            <span>Keep exploring the menu</span>
+                            <span>Keep exploring cakes</span>
                             <span>&uarr;</span>
                         </a>
                     </div>
@@ -381,7 +324,7 @@
     </section>
 
     <!-- =========================================================
-         6. ALIGNED 3-COLUMN CONTACT, WHATSAPP & INSTAGRAM SECTION
+         5. ALIGNED 3-COLUMN CONTACT, WHATSAPP & INSTAGRAM SECTION
     ========================================================== -->
     <section id="contact" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div class="text-center max-w-2xl mx-auto mb-12">
@@ -486,7 +429,7 @@
     </section>
 
     <!-- =========================================================
-         7. FOOTER
+         6. FOOTER
     ========================================================== -->
     <footer class="border-t border-zinc-800/80 bg-zinc-950 py-10 px-4 sm:px-6 lg:px-8 pb-24 sm:pb-10">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-zinc-400">
@@ -499,13 +442,13 @@
             <div class="flex items-center gap-5">
                 <a href="https://wa.me/918848936732" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">WhatsApp</a>
                 <a href="https://instagram.com/cremeandco.bakery" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Instagram</a>
-                <a href="#menu" class="hover:text-white transition-colors">Rate Card</a>
+                <a href="#cakes" class="hover:text-white transition-colors">Cake Models</a>
             </div>
         </div>
     </footer>
 
     <!-- =========================================================
-         8. MOBILE STICKY BOTTOM ORDER BAR
+         7. MOBILE STICKY BOTTOM ORDER BAR
     ========================================================== -->
     <div id="mobile-sticky-bar" class="fixed bottom-0 inset-x-0 z-30 sm:hidden hidden bg-zinc-950/95 border-t border-zinc-800 backdrop-blur-xl px-4 py-3">
         <a
