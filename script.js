@@ -62,22 +62,6 @@ const FEATURED_CAKES = [
 ];
 
 /**
- * Complete 10-Cake Menu & Rate Card
- */
-const FULL_MENU_CAKES = [
-    { id: "black-forest", name: "Black Forest Cake", note: "Dark chocolate, fresh cream & cherries", prices: { "0.5 Kg": 350, "1.0 Kg": 650, "2.0 Kg": 1250 } },
-    { id: "white-forest", name: "White Forest Cake", note: "Vanilla sponge, white chocolate curls & cherries", prices: { "0.5 Kg": 380, "1.0 Kg": 700, "2.0 Kg": 1350 } },
-    { id: "chocolate-truffle", name: "Chocolate Truffle Cake", note: "Rich dark chocolate ganache layers", prices: { "0.5 Kg": 420, "1.0 Kg": 800, "2.0 Kg": 1550 } },
-    { id: "red-velvet", name: "Red Velvet Cake", note: "Crimson cocoa sponge & cream cheese frosting", prices: { "0.5 Kg": 450, "1.0 Kg": 850, "2.0 Kg": 1650 } },
-    { id: "butterscotch-crunch", name: "Butterscotch Crunch Cake", note: "Caramel cream & crunchy praline bits", prices: { "0.5 Kg": 350, "1.0 Kg": 650, "2.0 Kg": 1250 } },
-    { id: "fresh-pineapple", name: "Fresh Pineapple Cake", note: "Whipped cream & juicy pineapple tidbits", prices: { "0.5 Kg": 320, "1.0 Kg": 600, "2.0 Kg": 1150 } },
-    { id: "strawberry-cream", name: "Strawberry Fresh Cream", note: "Berry compote & light vanilla whipped cream", prices: { "0.5 Kg": 360, "1.0 Kg": 680, "2.0 Kg": 1300 } },
-    { id: "mango-alphonso", name: "Mango Alphonso Gateau", note: "Alphonso mango pulp & velvety cream layers", prices: { "0.5 Kg": 390, "1.0 Kg": 750, "2.0 Kg": 1450 } },
-    { id: "blueberry-cheesecake", name: "Blueberry Cheesecake", note: "Creamy baked cheesecake with blueberry glaze", prices: { "0.5 Kg": 520, "1.0 Kg": 980, "2.0 Kg": 1900 } },
-    { id: "oreo-cookies-cream", name: "Oreo Cookies & Cream", note: "Crushed Oreo chocolate sponge & cookies cream", prices: { "0.5 Kg": 400, "1.0 Kg": 750, "2.0 Kg": 1450 } }
-];
-
-/**
  * Quick-Add Bakery Extras
  */
 const BAKERY_EXTRAS = [
@@ -92,6 +76,15 @@ const cardSelections = {};
 FEATURED_CAKES.forEach(cake => {
     cardSelections[cake.id] = { weight: "1.0 Kg", qty: 1 };
 });
+
+// Track Customer Requirement Design Model State (No fixed price — owner quotes on WhatsApp)
+const customDesignState = {
+    weight: "1.0 Kg",
+    qty: 1,
+    notes: "",
+    imageName: "",
+    imageDataUrl: ""
+};
 
 // Order Bag & GPS State
 let orderBag = [];
@@ -152,13 +145,13 @@ function initHeroVideo() {
 }
 
 /**
- * Render 6 Featured Cake Product Cards (Only Add to Bag button, Order Now button removed)
+ * Render 6 Featured Cake Product Cards + 1 Customer Requirement Design Model Card
  */
 function renderFeaturedCakes() {
     const grid = document.getElementById("featured-cakes-grid");
     if (!grid) return;
 
-    grid.innerHTML = FEATURED_CAKES.map(cake => {
+    const standardCardsHtml = FEATURED_CAKES.map(cake => {
         const sel = cardSelections[cake.id];
         const currentPrice = cake.prices[sel.weight];
 
@@ -216,7 +209,7 @@ function renderFeaturedCakes() {
                     </div>
                 </div>
 
-                <!-- Quantity Stepper + Single Add to Bag Button -->
+                <!-- Quantity Stepper + Add to Bag Button -->
                 <div class="p-6 pt-2 space-y-3">
                     <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 rounded-2xl px-3.5 py-2">
                         <span class="text-xs font-medium text-zinc-400">Quantity</span>
@@ -248,6 +241,152 @@ function renderFeaturedCakes() {
             </article>
         `;
     }).join("");
+
+    // Customer Requirement Design Model Card (No price shown; image upload + custom requirement notes)
+    const customWeights = ["0.5 Kg", "1.0 Kg", "2.0 Kg", "3.0 Kg+"];
+    const customWeightButtons = customWeights.map(w => {
+        const isSelected = customDesignState.weight === w;
+        return `
+            <button
+                type="button"
+                onclick="selectCustomWeight('${w}')"
+                class="flex-1 py-2 px-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
+                    isSelected
+                        ? "bg-white text-zinc-950 border-white shadow-sm"
+                        : "bg-zinc-900/90 text-zinc-300 border-zinc-800 hover:border-zinc-600"
+                }"
+            >
+                ${w}
+            </button>
+        `;
+    }).join("");
+
+    const customCardHtml = `
+        <article class="glass-card rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 border-amber-400/30">
+            <div>
+                <!-- Custom Reference Image Preview / Upload Banner -->
+                <div class="relative aspect-[4/3] w-full overflow-hidden bg-zinc-900 border-b border-zinc-800/80">
+                    <img
+                        id="custom-cake-preview"
+                        src="${customDesignState.imageDataUrl || ""}"
+                        alt="Custom Cake Reference"
+                        class="${customDesignState.imageDataUrl ? "" : "hidden"} w-full h-full object-cover"
+                    >
+                    <label
+                        for="custom-cake-image-input"
+                        id="custom-cake-upload-placeholder"
+                        class="${customDesignState.imageDataUrl ? "hidden" : "flex"} flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-zinc-800/60 transition-colors p-6 text-center"
+                    >
+                        <div class="w-12 h-12 rounded-2xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-amber-300 mb-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-bold text-white">Tap to Upload Design Image</span>
+                        <span class="text-[11px] text-zinc-400 mt-1">Upload a sample photo for the owner</span>
+                    </label>
+
+                    <input
+                        id="custom-cake-image-input"
+                        type="file"
+                        accept="image/*"
+                        onchange="handleCustomImageUpload(event)"
+                        class="hidden"
+                    >
+
+                    <div class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-400/40 backdrop-blur-md text-[11px] font-semibold text-amber-200">
+                        Custom Design
+                    </div>
+
+                    <div class="absolute bottom-3.5 right-3.5 px-3.5 py-1.5 rounded-full bg-zinc-950/90 border border-amber-400/30 backdrop-blur-md font-display text-xs font-bold text-amber-300">
+                        Price: Owner Quote
+                    </div>
+
+                    ${customDesignState.imageDataUrl ? `
+                        <button
+                            type="button"
+                            onclick="clearCustomImage()"
+                            class="absolute top-3.5 right-3.5 px-2.5 py-1 rounded-full bg-zinc-950/85 border border-white/20 text-[11px] font-semibold text-rose-300 hover:text-white"
+                        >
+                            Remove Photo
+                        </button>
+                    ` : ""}
+                </div>
+
+                <!-- Custom Requirement Details -->
+                <div class="p-6 pb-4">
+                    <div class="flex items-center justify-between gap-2">
+                        <h3 class="font-display text-xl font-bold text-white">Customer Requirement Design</h3>
+                    </div>
+                    <p class="text-xs text-zinc-400 mt-1.5 leading-relaxed">
+                        Share your theme, flavor, and reference image. No price is charged upfront — the owner will review and confirm the rate on WhatsApp.
+                    </p>
+
+                    <!-- Requirement Textbox -->
+                    <div class="mt-4">
+                        <label for="custom-design-notes" class="block text-[11px] uppercase tracking-wider text-zinc-400 font-semibold mb-1.5">
+                            Design &amp; Flavor Requirements <span class="text-rose-400">*</span>
+                        </label>
+                        <textarea
+                            id="custom-design-notes"
+                            rows="2"
+                            oninput="customDesignState.notes = this.value"
+                            placeholder="e.g., 2-tier chocolate truffle theme cake, pastel blue cream..."
+                            class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950/90 border border-zinc-800 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-amber-400/60 transition-colors resize-none"
+                        >${customDesignState.notes}</textarea>
+                    </div>
+
+                    <!-- Change Image Button (when image is already selected) -->
+                    <div class="mt-2.5 flex items-center justify-between">
+                        <label for="custom-cake-image-input" class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-300 hover:text-amber-200 cursor-pointer">
+                            <span>+ ${customDesignState.imageName ? "Change Reference Photo" : "Add Reference Photo"}</span>
+                        </label>
+                        <span class="text-[11px] text-zinc-400 truncate max-w-[140px]">${customDesignState.imageName || "No photo selected"}</span>
+                    </div>
+
+                    <!-- Weight Selector -->
+                    <div class="mt-4">
+                        <span class="block text-[11px] uppercase tracking-wider text-zinc-400 font-semibold mb-2">Preferred Weight</span>
+                        <div class="flex items-center gap-1.5">
+                            ${customWeightButtons}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantity Stepper + Add Custom Model to Bag -->
+            <div class="p-6 pt-2 space-y-3">
+                <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 rounded-2xl px-3.5 py-2">
+                    <span class="text-xs font-medium text-zinc-400">Quantity</span>
+                    <div class="flex items-center gap-3">
+                        <button
+                            type="button"
+                            onclick="updateCustomQty(-1)"
+                            class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold flex items-center justify-center transition-colors"
+                            aria-label="Decrease quantity"
+                        >&minus;</button>
+                        <span id="custom-qty-display" class="font-display font-bold text-sm text-white w-5 text-center">${customDesignState.qty}</span>
+                        <button
+                            type="button"
+                            onclick="updateCustomQty(1)"
+                            class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold flex items-center justify-center transition-colors"
+                            aria-label="Increase quantity"
+                        >+</button>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    onclick="addCustomDesignToBag()"
+                    class="w-full py-3 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 text-xs sm:text-sm font-bold transition-colors active:scale-95"
+                >
+                    Add Custom Model to Bag
+                </button>
+            </div>
+        </article>
+    `;
+
+    grid.innerHTML = standardCardsHtml + customCardHtml;
 }
 
 function selectCardWeight(cakeId, weight) {
@@ -273,89 +412,79 @@ function addFeaturedCakeToBag(cakeId) {
         name: cake.name,
         variant: weight,
         unitPrice: unitPrice,
-        qty: qty
+        qty: qty,
+        isCustomQuote: false
     });
 
     showToast(`Added ${qty} × ${cake.name} (${weight})`);
 }
 
 /**
- * Render 10-Cake Menu & Rate Card (Desktop Table + Mobile Stacked Cards)
+ * Custom Design Model Handlers
  */
-function renderMenuRateCard() {
-    const tbody = document.getElementById("desktop-menu-tbody");
-    const mobileContainer = document.getElementById("mobile-menu-cards");
-
-    if (tbody) {
-        tbody.innerHTML = FULL_MENU_CAKES.map((item, idx) => {
-            const num = String(idx + 1).padStart(2, "0");
-            return `
-                <tr class="hover:bg-white/[0.03] transition-colors">
-                    <td class="py-4 px-6 font-display text-zinc-500 font-semibold">${num}</td>
-                    <td class="py-4 px-6">
-                        <div class="font-semibold text-white">${item.name}</div>
-                        <div class="text-xs text-zinc-400 mt-0.5">${item.note}</div>
-                    </td>
-                    ${["0.5 Kg", "1.0 Kg", "2.0 Kg"].map(w => `
-                        <td class="py-4 px-6 text-center">
-                            <button
-                                type="button"
-                                onclick="quickAddMenuCake('${item.id}', '${w}')"
-                                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-white hover:text-zinc-950 border border-zinc-700 text-zinc-200 font-semibold text-xs transition-all active:scale-95"
-                                title="Add ${item.name} (${w}) to order"
-                            >
-                                <span>₹${item.prices[w]}</span>
-                                <span class="opacity-60">+</span>
-                            </button>
-                        </td>
-                    `).join("")}
-                </tr>
-            `;
-        }).join("");
-    }
-
-    if (mobileContainer) {
-        mobileContainer.innerHTML = FULL_MENU_CAKES.map((item, idx) => {
-            const num = String(idx + 1).padStart(2, "0");
-            return `
-                <div class="glass-card rounded-2xl p-4 space-y-3">
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <span class="text-[11px] font-display font-bold text-zinc-500">${num}</span>
-                            <h3 class="font-display font-bold text-base text-white">${item.name}</h3>
-                            <p class="text-xs text-zinc-400 mt-0.5">${item.note}</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 pt-1">
-                        ${["0.5 Kg", "1.0 Kg", "2.0 Kg"].map(w => `
-                            <button
-                                type="button"
-                                onclick="quickAddMenuCake('${item.id}', '${w}')"
-                                class="py-2.5 px-2 rounded-xl bg-zinc-900 hover:bg-white hover:text-zinc-950 border border-zinc-700 text-center transition-colors active:scale-95"
-                            >
-                                <div class="text-[10px] text-zinc-400">${w}</div>
-                                <div class="text-xs font-bold text-white mt-0.5">₹${item.prices[w]} +</div>
-                            </button>
-                        `).join("")}
-                    </div>
-                </div>
-            `;
-        }).join("");
-    }
+function selectCustomWeight(weight) {
+    customDesignState.weight = weight;
+    renderFeaturedCakes();
 }
 
-function quickAddMenuCake(cakeId, weight) {
-    const item = FULL_MENU_CAKES.find(c => c.id === cakeId);
-    if (!item) return;
+function updateCustomQty(delta) {
+    const next = Math.max(1, Math.min(20, customDesignState.qty + delta));
+    customDesignState.qty = next;
+    const qtyEl = document.getElementById("custom-qty-display");
+    if (qtyEl) qtyEl.textContent = next;
+}
 
+function handleCustomImageUpload(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    customDesignState.imageName = file.name;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        customDesignState.imageDataUrl = e.target.result;
+        renderFeaturedCakes();
+        showToast("Design reference image attached");
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearCustomImage() {
+    customDesignState.imageName = "";
+    customDesignState.imageDataUrl = "";
+    renderFeaturedCakes();
+}
+
+function addCustomDesignToBag() {
+    const notesEl = document.getElementById("custom-design-notes");
+    const notesText = notesEl ? notesEl.value.trim() : customDesignState.notes.trim();
+
+    if (!notesText && !customDesignState.imageDataUrl) {
+        showToast("Please describe your design or upload a reference photo.");
+        if (notesEl) notesEl.focus();
+        return;
+    }
+
+    const uniqueKey = `custom-design-${Date.now()}`;
     addItemToBag({
-        key: `${item.id}-${weight}`,
-        name: item.name,
-        variant: weight,
-        unitPrice: item.prices[weight],
-        qty: 1
+        key: uniqueKey,
+        name: "Custom Design Cake",
+        variant: customDesignState.weight,
+        unitPrice: null, // No price displayed — owner quotes on WhatsApp
+        qty: customDesignState.qty,
+        isCustomQuote: true,
+        customNotes: notesText || "Refer to attached design image",
+        customImageName: customDesignState.imageName,
+        customImageDataUrl: customDesignState.imageDataUrl
     });
-    showToast(`Added ${item.name} (${weight}) to order`);
+
+    // Reset custom form fields after adding
+    customDesignState.notes = "";
+    customDesignState.imageName = "";
+    customDesignState.imageDataUrl = "";
+    customDesignState.qty = 1;
+    renderFeaturedCakes();
+
+    showToast("Custom design added to bag (Price: Owner Quote)");
 }
 
 /**
@@ -386,7 +515,8 @@ function quickAddExtra(extraId) {
         name: extra.name,
         variant: "Add-on",
         unitPrice: extra.price,
-        qty: 1
+        qty: 1,
+        isCustomQuote: false
     });
     showToast(`Added ${extra.name}`);
 }
@@ -395,12 +525,15 @@ function quickAddExtra(extraId) {
  * Bag / Order Summary Management
  */
 function addItemToBag(newItem) {
-    const existing = orderBag.find(item => item.key === newItem.key);
-    if (existing) {
-        existing.qty += newItem.qty;
-    } else {
-        orderBag.push({ ...newItem });
+    if (!newItem.isCustomQuote) {
+        const existing = orderBag.find(item => item.key === newItem.key);
+        if (existing) {
+            existing.qty += newItem.qty;
+            updateBagUI();
+            return;
+        }
     }
+    orderBag.push({ ...newItem });
     updateBagUI();
 }
 
@@ -425,18 +558,39 @@ function removeBagItem(key) {
 
 function updateBagUI() {
     const totalQty = orderBag.reduce((sum, item) => sum + item.qty, 0);
-    const totalPrice = orderBag.reduce((sum, item) => sum + item.unitPrice * item.qty, 0);
+    const knownTotalPrice = orderBag.reduce((sum, item) => {
+        return item.isCustomQuote ? sum : sum + (item.unitPrice * item.qty);
+    }, 0);
+    const hasCustomItem = orderBag.some(item => item.isCustomQuote);
 
     const navCount = document.getElementById("nav-bag-count");
-    const orderTotalEl = document.getElementById("order-total-price");
+    const orderTotalDisplay = document.getElementById("order-total-display");
+    const customQuoteNote = document.getElementById("custom-quote-note");
     const stickyBar = document.getElementById("mobile-sticky-bar");
     const stickyCount = document.getElementById("sticky-bar-count");
     const stickyTotal = document.getElementById("sticky-bar-total");
 
     if (navCount) navCount.textContent = totalQty;
-    if (orderTotalEl) orderTotalEl.textContent = totalPrice;
     if (stickyCount) stickyCount.textContent = totalQty;
-    if (stickyTotal) stickyTotal.textContent = totalPrice;
+
+    // Format total price display depending on whether custom quote items exist
+    let totalLabel = `₹${knownTotalPrice}`;
+    if (hasCustomItem && knownTotalPrice > 0) {
+        totalLabel = `₹${knownTotalPrice} + Quote`;
+    } else if (hasCustomItem && knownTotalPrice === 0) {
+        totalLabel = `Owner Quote`;
+    }
+
+    if (orderTotalDisplay) orderTotalDisplay.textContent = totalLabel;
+    if (stickyTotal) stickyTotal.innerHTML = `${totalLabel} &rarr;`;
+
+    if (customQuoteNote) {
+        if (hasCustomItem) {
+            customQuoteNote.classList.remove("hidden");
+        } else {
+            customQuoteNote.classList.add("hidden");
+        }
+    }
 
     if (stickyBar) {
         if (totalQty > 0) {
@@ -454,55 +608,113 @@ function updateBagUI() {
             <div class="py-10 text-left">
                 <p class="text-base font-semibold text-zinc-200">No cakes added yet.</p>
                 <p class="text-sm text-zinc-400 mt-1">
-                    Tap <span class="text-zinc-200 font-medium">Add to Bag</span> on any of our 6 cake models or pick a rate from the menu above.
+                    Tap <span class="text-zinc-200 font-medium">Add to Bag</span> on any cake model or customize your own design above.
                 </p>
             </div>
         `;
         return;
     }
 
-    listContainer.innerHTML = orderBag.map(item => `
-        <div class="py-5 flex items-start justify-between gap-4">
-            <div class="space-y-1.5">
-                <h3 class="font-display text-base sm:text-lg font-bold text-white">
-                    ${item.name} <span class="text-xs font-normal text-zinc-400">(${item.variant})</span>
-                </h3>
-                <p class="text-xs sm:text-sm text-zinc-400">
-                    ${item.qty} &times; ₹${item.unitPrice}
-                </p>
-                <div class="pt-1 flex items-center gap-2">
-                    <button
-                        type="button"
-                        onclick="changeBagItemQty('${item.key}', -1)"
-                        class="w-7 h-7 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white text-sm font-bold flex items-center justify-center transition-colors"
-                        aria-label="Decrease quantity"
-                    >&minus;</button>
-                    <span class="font-display text-xs font-bold text-white w-5 text-center">${item.qty}</span>
-                    <button
-                        type="button"
-                        onclick="changeBagItemQty('${item.key}', 1)"
-                        class="w-7 h-7 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white text-sm font-bold flex items-center justify-center transition-colors"
-                        aria-label="Increase quantity"
-                    >+</button>
-                    <button
-                        type="button"
-                        onclick="removeBagItem('${item.key}')"
-                        class="ml-2 text-xs text-zinc-500 hover:text-rose-400 transition-colors"
-                    >
-                        Remove
-                    </button>
+    listContainer.innerHTML = orderBag.map(item => {
+        if (item.isCustomQuote) {
+            return `
+                <div class="py-5 flex items-start justify-between gap-4">
+                    <div class="flex items-start gap-3.5">
+                        ${item.customImageDataUrl ? `
+                            <img src="${item.customImageDataUrl}" alt="Custom Design" class="w-16 h-16 rounded-xl object-cover border border-amber-400/30 shrink-0">
+                        ` : ""}
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-display text-base sm:text-lg font-bold text-white">
+                                    ${item.name} <span class="text-xs font-normal text-zinc-400">(${item.variant})</span>
+                                </h3>
+                                <span class="px-2 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-[10px] font-semibold text-amber-300">
+                                    Custom Requirement
+                                </span>
+                            </div>
+                            <p class="text-xs text-zinc-300 leading-relaxed">
+                                <span class="text-zinc-400">Design Note:</span> ${item.customNotes}
+                            </p>
+                            ${item.customImageName ? `
+                                <p class="text-[11px] text-amber-300">
+                                    📎 Photo attached: ${item.customImageName}
+                                </p>
+                            ` : ""}
+                            <div class="pt-1 flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onclick="changeBagItemQty('${item.key}', -1)"
+                                    class="w-7 h-7 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white text-sm font-bold flex items-center justify-center transition-colors"
+                                    aria-label="Decrease quantity"
+                                >&minus;</button>
+                                <span class="font-display text-xs font-bold text-white w-5 text-center">${item.qty}</span>
+                                <button
+                                    type="button"
+                                    onclick="changeBagItemQty('${item.key}', 1)"
+                                    class="w-7 h-7 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white text-sm font-bold flex items-center justify-center transition-colors"
+                                    aria-label="Increase quantity"
+                                >+</button>
+                                <button
+                                    type="button"
+                                    onclick="removeBagItem('${item.key}')"
+                                    class="ml-2 text-xs text-zinc-500 hover:text-rose-400 transition-colors"
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="font-display text-xs sm:text-sm font-bold text-amber-300 shrink-0 text-right">
+                        Price on<br>WhatsApp
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="py-5 flex items-start justify-between gap-4">
+                <div class="space-y-1.5">
+                    <h3 class="font-display text-base sm:text-lg font-bold text-white">
+                        ${item.name} <span class="text-xs font-normal text-zinc-400">(${item.variant})</span>
+                    </h3>
+                    <p class="text-xs sm:text-sm text-zinc-400">
+                        ${item.qty} &times; ₹${item.unitPrice}
+                    </p>
+                    <div class="pt-1 flex items-center gap-2">
+                        <button
+                            type="button"
+                            onclick="changeBagItemQty('${item.key}', -1)"
+                            class="w-7 h-7 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white text-sm font-bold flex items-center justify-center transition-colors"
+                            aria-label="Decrease quantity"
+                        >&minus;</button>
+                        <span class="font-display text-xs font-bold text-white w-5 text-center">${item.qty}</span>
+                        <button
+                            type="button"
+                            onclick="changeBagItemQty('${item.key}', 1)"
+                            class="w-7 h-7 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white text-sm font-bold flex items-center justify-center transition-colors"
+                            aria-label="Increase quantity"
+                        >+</button>
+                        <button
+                            type="button"
+                            onclick="removeBagItem('${item.key}')"
+                            class="ml-2 text-xs text-zinc-500 hover:text-rose-400 transition-colors"
+                        >
+                            Remove
+                        </button>
+                    </div>
+                </div>
+
+                <div class="font-display text-base sm:text-lg font-bold text-white shrink-0">
+                    ₹${item.unitPrice * item.qty}
                 </div>
             </div>
-
-            <div class="font-display text-base sm:text-lg font-bold text-white shrink-0">
-                ₹${item.unitPrice * item.qty}
-            </div>
-        </div>
-    `).join("");
+        `;
+    }).join("");
 }
 
 /**
- * Live GPS Location Detection + Reverse Geocoding & Google Maps Pin
+ * Live GPS Location Detection
  */
 function detectCustomerLocation() {
     const locationInput = document.getElementById("customer-location");
@@ -530,7 +742,6 @@ function detectCustomerLocation() {
                 pinBadge.classList.remove("hidden");
             }
 
-            // Try fetching readable street/area address via OpenStreetMap Nominatim
             try {
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
                 if (res.ok) {
@@ -539,9 +750,7 @@ function detectCustomerLocation() {
                         locationInput.value = data.display_name;
                     }
                 }
-            } catch (_) {
-                // Fallback if offline or blocked
-            }
+            } catch (_) {}
 
             if (!locationInput.value.trim()) {
                 locationInput.value = `Live GPS Location (${lat}, ${lng})`;
@@ -595,11 +804,11 @@ function showToast(message) {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
         toast.classList.add("hidden");
-    }, 2200);
+    }, 2400);
 }
 
 /**
- * Generate Structured Owner Invoice / Bill & Open WhatsApp
+ * Generate Structured Owner Invoice / Custom Quote Request & Open WhatsApp
  */
 function sendOrderToWhatsApp() {
     const errorBox = document.getElementById("checkout-error");
@@ -616,12 +825,12 @@ function sendOrderToWhatsApp() {
     const cakeMessage = messageInput ? messageInput.value.trim() : "";
 
     if (orderBag.length === 0) {
-        errorBox.textContent = "Please add at least one cake to your order before sending.";
+        errorBox.textContent = "Please add at least one cake or custom design to your bag before sending.";
         errorBox.classList.remove("hidden");
         return;
     }
     if (!customerName) {
-        errorBox.textContent = "Please enter your name so we can prepare your order bill.";
+        errorBox.textContent = "Please enter your name so we can prepare your order.";
         errorBox.classList.remove("hidden");
         nameInput.focus();
         return;
@@ -635,32 +844,44 @@ function sendOrderToWhatsApp() {
 
     errorBox.classList.add("hidden");
 
-    // Generate Order ID & Timestamp
     const now = new Date();
     const orderId = "CS-" + String(now.getTime()).slice(-5);
     const dateStr = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
     const timeStr = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
 
     const totalQty = orderBag.reduce((sum, item) => sum + item.qty, 0);
-    const grandTotal = orderBag.reduce((sum, item) => sum + item.unitPrice * item.qty, 0);
+    const knownTotal = orderBag.reduce((sum, item) => item.isCustomQuote ? sum : sum + item.unitPrice * item.qty, 0);
+    const hasCustomItem = orderBag.some(item => item.isCustomQuote);
+    const hasAttachedImage = orderBag.some(item => item.isCustomQuote && item.customImageName);
 
     const itemBillLines = orderBag.map((item, idx) => {
+        if (item.isCustomQuote) {
+            const photoText = item.customImageName ? `\n    📎 *Design Photo:* ${item.customImageName} (Attaching in chat)` : "";
+            return `${idx + 1}. *${item.name}* [${item.variant}] (Qty: ${item.qty})\n    • *Requirement:* ${item.customNotes}${photoText}\n    • *Price:* _Owner to review & quote_`;
+        }
         const lineTotal = item.unitPrice * item.qty;
         return `${idx + 1}. *${item.name}* [${item.variant}]\n    Qty: ${item.qty} × ₹${item.unitPrice} = *₹${lineTotal}*`;
     }).join("\n");
 
+    let grandTotalLine = `*GRAND TOTAL:* *₹${knownTotal}*`;
+    if (hasCustomItem && knownTotal > 0) {
+        grandTotalLine = `*SUBTOTAL (Standard Items):* *₹${knownTotal}*\n*CUSTOM DESIGN:* _Pending Owner Quote_`;
+    } else if (hasCustomItem && knownTotal === 0) {
+        grandTotalLine = `*PRICE:* _Pending Owner Review & Quote_`;
+    }
+
     const billLines = [
-        `🧾 *${SHOP_CONFIG.shopName.toUpperCase()} — ORDER BILL*`,
+        `🧾 *${SHOP_CONFIG.shopName.toUpperCase()} — ORDER REQUEST*`,
         `━━━━━━━━━━━━━━━━━━━━━━`,
         `*Order ID:* #${orderId}`,
         `*Date & Time:* ${dateStr}, ${timeStr}`,
         `*Order Mode:* ${orderType}`,
         `━━━━━━━━━━━━━━━━━━━━━━`,
-        `*ITEMIZED BILL DETAILS:*`,
+        `*ORDER DETAILS:*`,
         itemBillLines,
         `━━━━━━━━━━━━━━━━━━━━━━`,
         `*Total Items:* ${totalQty}`,
-        `*GRAND TOTAL:* *₹${grandTotal}*`,
+        grandTotalLine,
         `━━━━━━━━━━━━━━━━━━━━━━`,
         `*CUSTOMER & DELIVERY DETAILS:*`,
         `• *Name:* ${customerName}`
@@ -680,7 +901,11 @@ function sendOrderToWhatsApp() {
     }
 
     billLines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
-    billLines.push(`_Please confirm availability & delivery time._`);
+    if (hasAttachedImage) {
+        billLines.push(`_Note: Customer uploaded a design reference photo — please attach/send the image right below this message._`);
+    } else {
+        billLines.push(`_Please confirm availability, custom quote (if any) & delivery time._`);
+    }
 
     const encodedText = encodeURIComponent(billLines.join("\n"));
     const whatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodedText}`;
@@ -691,7 +916,6 @@ function sendOrderToWhatsApp() {
 document.addEventListener("DOMContentLoaded", () => {
     initHeroVideo();
     renderFeaturedCakes();
-    renderMenuRateCard();
     renderAddons();
     updateBagUI();
 });
